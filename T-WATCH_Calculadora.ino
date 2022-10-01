@@ -49,6 +49,8 @@ float old_cifra = 0;
 int digitos = 0;
 bool coma = false;
 char operador_anterior = 0;
+int x_operador = 2;
+int y_operador = 54;
 
 
 void setup() {
@@ -134,7 +136,10 @@ void captura_teclas() {
     ttgo->tft->setTextColor(TFT_WHITE, TFT_BLACK);
 
     if (isDigit(tecla) || tecla == 46) input = 1;
-    if (tecla == 42 || tecla == 43 || tecla == 45 || tecla == 47) input = 2;
+    if (tecla == 42 || tecla == 43 || tecla == 45 || tecla == 47) {
+      input = 2;
+      ttgo->tft->drawRoundRect(2 + x * 60, 54 + y * 46, 56, 42, 8, TFT_YELLOW);
+    }
     if (tecla == 61) input = 3;
 
     switch (input) {
@@ -156,6 +161,12 @@ void captura_teclas() {
         pinta(" Operador ");
         cifra_str = "";
         coma = false;
+        ttgo->tft->drawRoundRect(x_operador, y_operador, 56, 42, 8, 0x7D7E);
+        ttgo->tft->drawRoundRect(x_operador + 1, y_operador + 1, 54, 40, 8, 0x7D7E);
+        x_operador = 2 + x * 60;
+        y_operador = 54 + y * 46;
+        ttgo->tft->drawRoundRect(x_operador, y_operador, 56, 42, 8, TFT_YELLOW);
+        ttgo->tft->drawRoundRect(x_operador + 1, y_operador + 1, 54, 40, 8, TFT_YELLOW);
         if (input_anterior == 1) {
           valores[indice_valores] = cifra;
           indice_valores++;
@@ -166,13 +177,13 @@ void captura_teclas() {
         indice_operadores++;
         if (indice_operadores == 20) indice_operadores = 0;
         if (input_anterior == 1 && indice_valores > 1) {
-          float resultado = proc_operaciones(operadores[indice_operadores - 2], valores[indice_valores - 2], valores[indice_valores - 1]);
-          valores[indice_valores] = resultado;
+          String resultado = proc_operaciones(operadores[indice_operadores - 2], valores[indice_valores - 2], valores[indice_valores - 1]);
+          valores[indice_valores] = resultado.toFloat();
           indice_valores++;
           if (indice_valores == 20) indice_valores = 0;
           ttgo->tft->fillRect(36, 17, 222, 20, TFT_BLACK);
-          ttgo->tft->drawString(String(resultado), 36, 17, 4);
-          pinta("Resultado: " + String(resultado));
+          ttgo->tft->drawString(resultado, 36, 17, 4);
+          pinta("Resultado: " + resultado);
         }
         break;
 
@@ -180,31 +191,33 @@ void captura_teclas() {
         pinta(" igual ");
         cifra_str = "";
         coma = false;
-        float resultado;
-        valores[indice_valores] = cifra;
-        indice_valores++;
-        if (indice_valores == 20) indice_valores = 0;
+        ttgo->tft->drawRoundRect(x_operador, y_operador, 56, 42, 8, 0x7D7E);
+        ttgo->tft->drawRoundRect(x_operador + 1, y_operador + 1, 54, 40, 8, 0x7D7E);
+        String resultado;
         if (indice_operadores > 0) {
           if (input_anterior == 1) {
-            resultado = proc_operaciones(operadores[indice_operadores - 1], valores[indice_valores - 2], valores[indice_valores - 1]);
-            valores[indice_valores] = resultado;
+            valores[indice_valores] = cifra;
             indice_valores++;
             if (indice_valores == 20) indice_valores = 0;
-            pinta("Resultado: " + String(resultado));
+
+            resultado = proc_operaciones(operadores[indice_operadores - 1], valores[indice_valores - 2], valores[indice_valores - 1]);
+            valores[indice_valores] = resultado.toFloat();
+            indice_valores++;
+            if (indice_valores == 20) indice_valores = 0;
+            pinta("Resultado: " + resultado);
           } else {
             resultado = proc_operaciones(operadores[indice_operadores - 1], valores[indice_valores - 1], valores[indice_valores - 1]);
-            valores[indice_valores] = resultado;
+            valores[indice_valores] = resultado.toFloat();
             indice_valores++;
             if (indice_valores == 20) indice_valores = 0;
-            pinta("Resultado: " + String(resultado));
+            pinta("Resultado: " + resultado);
           }
           ttgo->tft->fillRect(36, 17, 222, 20, TFT_BLACK);
-          ttgo->tft->drawString(String(resultado), 36, 17, 4);
+          ttgo->tft->drawString(resultado, 36, 17, 4);
         }
         break;
     }
     input_anterior = input;
-
   } else if (x <= 30) {
     cifra_str = "";
     cifra = 0;
@@ -223,11 +236,12 @@ void captura_teclas() {
     ttgo->tft->setTextColor(TFT_WHITE, TFT_BLACK);
     ttgo->tft->fillRect(37, 16, 202, 20, TFT_BLACK);
   }
-  delay(500);
+  delay(300);
 }
 
-float proc_operaciones(char tecla_, double cifra_1, double cifra_2) {
+String proc_operaciones(char tecla_, double cifra_1, double cifra_2) {
   float resultado = 0;
+  String resultado_str = "";
   switch (tecla_) {
     case 43:
       resultado = cifra_1 + cifra_2;
@@ -242,7 +256,10 @@ float proc_operaciones(char tecla_, double cifra_1, double cifra_2) {
       resultado = cifra_1 / cifra_2;
       break;
   }
-  return (resultado);
+  if (int(resultado * 10000) % 10000 == 0) {
+    resultado_str = String(int(resultado));
+  } else resultado_str = String(resultado);
+  return (resultado_str);
 }
 
 
