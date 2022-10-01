@@ -44,8 +44,6 @@ char input = 0;
 char input_anterior = 0;
 String cifra_str = "";
 float cifra = 0;
-float new_cifra = 0;
-float old_cifra = 0;
 int digitos = 0;
 bool coma = false;
 char operador_anterior = 0;
@@ -221,8 +219,6 @@ void captura_teclas() {
   } else if (x <= 30) {
     cifra_str = "";
     cifra = 0;
-    old_cifra = 0;
-    new_cifra = 0;
     digitos = 0;
     coma = false;
     for (int i = 0; i < 10; i++) {
